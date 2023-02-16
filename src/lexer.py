@@ -10,6 +10,7 @@ class TokenType(Enum):
     CloseParen = ")"
     BinaryOperator = "+-*/"
     Let = "let"
+    EOF = "EOF"
 
 
 KEYWORDS: dict[str, TokenType] = {
@@ -23,23 +24,22 @@ class Token:
         self.type = type_
 
     def __repr__(self) -> str:
+        return f"<{self.type.name}>"
+
+    def __str__(self) -> str:
         return f"<{self.type.name}: {self.value}>"
 
     def __format__(self, spec: str = "short") -> str:
-        spec = "short" if not spec else spec
-        if spec == "short":
-            return f"<{self.type.name}>"
+        spec = "long" if not spec else spec
+        if spec == "long":
+            return f"<{self.type.name}: {self.value}>"
         else:
             return self.__repr__()
 
 
-def token(value: str, type_: TokenType) -> Token:
-    return Token(value=value, type_=type_)
-
-
-def tokenize(sourceCode: str) -> list[Token]:
+def tokenize(source_code: str) -> list[Token]:
     tokens: list[Token] = []
-    src: list[str] = [i for i in sourceCode]
+    src: list[str] = [i for i in source_code]
 
     # Build each token until the end of file
     while (len(src) > 0):
@@ -83,9 +83,12 @@ def tokenize(sourceCode: str) -> list[Token]:
 
             else:
                 raise RuntimeError(
-                    f"Unrecognized character found in source: {src[0]}")
+                    f"Unrecognized character found in source: {src[0]}"
+                )
 
+    tokens.append(Token(TokenType.EOF.value, TokenType.EOF))
     return tokens
 
 
-print(tokenize("let x = 1 * (4 +6)"))
+if __name__ == "__main__":
+    [print(i) for i in tokenize("let x = 1 * (4 +6)")]
