@@ -37,12 +37,21 @@ class Expr(Stmt):
     pass
 
 
-class BinaryExpr(Stmt):
+class BinaryExpr(Expr):
     def __init__(self, leftExpr: Expr, rightExpr: Expr, operator: str) -> None:
         super().__init__(kind="BinaryExpr")
         self.left = leftExpr
         self.right = rightExpr
         self.operator = operator
+
+    def __repr__(self) -> str:
+        info_dict = {
+            "kind": self.kind,
+            "left": self.left,
+            "right": self.right,
+            "operator": self.operator
+        }
+        return str(info_dict)
 
 
 class Identifier(Expr):
@@ -69,3 +78,4 @@ class NumericLiteral(Expr):
             "value": self.value
         }
         return str(info_dict)
+

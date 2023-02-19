@@ -1,6 +1,9 @@
 from enum import Enum
 import string
 
+from .exceptions import TokenizeError
+from .colored_text import gr
+
 
 class TokenType(Enum):
     Number = "0123456789"
@@ -8,13 +11,13 @@ class TokenType(Enum):
     Equals = "="
     OpenParen = "("
     CloseParen = ")"
-    BinaryOperator = "+-*/"
+    BinaryOperator = "+-*/%"
     Let = "let"
     EOF = "EOF"
 
 
 KEYWORDS: dict[str, TokenType] = {
-    "let": TokenType.Let
+    "let": TokenType.Let,
 }
 
 
@@ -74,6 +77,7 @@ def tokenize(source_code: str) -> list[Token]:
                 # check for reserved keywords
                 reserved = KEYWORDS.get(identifier)
                 if reserved:
+                    # print(reserved)
                     tokens.append(Token(identifier, reserved))
                 else:
                     tokens.append(Token(identifier, TokenType.Identifier))
@@ -82,8 +86,8 @@ def tokenize(source_code: str) -> list[Token]:
                 src.pop(0)
 
             else:
-                raise RuntimeError(
-                    f"Unrecognized character found in source: {src[0]}"
+                raise TokenizeError(
+                    f"Unrecognized character found in source: \"{gr(src[0])}\""
                 )
 
     tokens.append(Token(TokenType.EOF.value, TokenType.EOF))
