@@ -31,17 +31,28 @@ def eval_binary_expr(binop: BinaryExpr, env: Environment) -> RuntimeVal:
         return eval_numeric_binary_expr(lhs, rhs, binop.operator)
     return NullVal()
 
+
 def eval_identifier(ident: Identifier, env: Environment) -> RuntimeVal:
     return env.lookup_var(ident.symbol)
 
 
 def eval_var_declaration(declaration: VarDeclaration, env: Environment) -> RuntimeVal:
     if env.has_var(declaration.identifier):
-        raise VarExistsError(f"Can't declare variable {gr(declaration.identifier)}. As it is already defined.")
-    if declaration.value:
-        return env.declare_var(declaration.identifier, evaluate(declaration.value, env), declaration.is_const)
-    else:
-        return NullVal()
+        raise VarExistsError(
+            f"Can't declare variable {gr(declaration.identifier)}. As it is already defined.")
+
+    value = evaluate(
+        declaration.value, env
+    ) if declaration.value else NullVal()
+    return env.declare_var(declaration.identifier, value, declaration.is_const)
+
+
+def eval_assignment(assignment: AssignmentExpr, env: Environment) -> RuntimeVal:
+    if assignment.assign.kind != "Identifier":
+        raise InterpretError(f"Invalid assigned object")
+
+    assert isinstance(assignment.assign, Identifier)
+    return env.assign_var(assignment.assign.symbol, evaluate(assignment.value, env))
 
 
 def evaluate(astNode: Stmt, env: Environment) -> RuntimeVal:
@@ -61,6 +72,9 @@ def evaluate(astNode: Stmt, env: Environment) -> RuntimeVal:
         case "VarDeclaration":
             assert isinstance(astNode, VarDeclaration)
             return eval_var_declaration(astNode, env)
+        case "AssignmentExpr":
+            assert isinstance(astNode, AssignmentExpr)
+            return eval_assignment(astNode, env)
         case _:
             raise InterpretError(
                 f"This AST Node has not yet been setup for interpretation: <{gr(astNode.kind)}>")

@@ -63,7 +63,17 @@ class Parser:
         return decalaration
 
     def parse_expr(self) -> Expr:
-        return self.parse_additive_expr()
+        return self.parse_assignment_expr()
+    
+    def parse_assignment_expr(self) -> Expr:
+        left = self.parse_additive_expr()
+
+        if self.at().type == TokenType.Equals:
+            self.eat()
+            value = self.parse_assignment_expr()
+            return AssignmentExpr(left, value)
+        
+        return left
 
     def parse_additive_expr(self) -> Expr:
         left = self.parse_multiplicative_expr()

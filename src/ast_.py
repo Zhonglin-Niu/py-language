@@ -11,6 +11,7 @@ NodeType = Literal[
     # EXPR
     "NumericLiteral",
     "Identifier",
+    "AssignmentExpr",
     "BinaryExpr",
 ]
 
@@ -32,11 +33,10 @@ class Stmt:
         }
         for key, item in replaced_dict.items():
             repr = repr.replace(key, item)
-        
+
         # print(repr)
         print(json.dumps(json.loads(repr), indent=2))
         # print(self.__dict__)
-            
 
 
 class Expr(Stmt):
@@ -59,14 +59,6 @@ class VarDeclaration(Stmt):
         self.value = value
 
 
-class BinaryExpr(Expr):
-    def __init__(self, leftExpr: Expr, rightExpr: Expr, operator: str) -> None:
-        super().__init__(kind="BinaryExpr")
-        self.left = leftExpr
-        self.right = rightExpr
-        self.operator = operator
-
-
 class Identifier(Expr):
     def __init__(self, symbol: str) -> None:
         super().__init__(kind="Identifier")
@@ -77,3 +69,24 @@ class NumericLiteral(Expr):
     def __init__(self, value: str) -> None:
         super().__init__("NumericLiteral")
         self.value = float(value)
+
+
+class BinaryExpr(Expr):
+    def __init__(self, leftExpr: Expr, rightExpr: Expr, operator: str) -> None:
+        super().__init__(kind="BinaryExpr")
+        self.left = leftExpr
+        self.right = rightExpr
+        self.operator = operator
+
+
+class AssignmentExpr(Expr):
+    """
+    x = { "name": "Jason" }
+
+    x.name = "Taylor"
+    """
+
+    def __init__(self, assign: Expr, value: Expr) -> None:
+        super().__init__("AssignmentExpr")
+        self.assign = assign
+        self.value = value

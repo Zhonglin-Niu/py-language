@@ -33,7 +33,7 @@ def repl():
 
         try:
             program = parser.produce_ast(code)
-            program.print()
+            # program.print()
 
             rst = evaluate(program, env)
             print(rst)

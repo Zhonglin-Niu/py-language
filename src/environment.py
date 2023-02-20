@@ -32,7 +32,7 @@ class Environment:
 
         if var_name in env.__constants:
             raise VarExistsError(
-                f"Can't reassign constan variable {gr(var_name)}")
+                f"Can't reassign constant variable {gr(var_name)}")
 
         env.__variables.update({var_name: value})
         return value
