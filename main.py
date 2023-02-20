@@ -4,6 +4,9 @@ from src.interpreter import *
 from src.environment import Environment
 from src.interpreter import BooleanVal
 
+import sys
+import traceback
+
 
 def repl():
     parser = Parser()
