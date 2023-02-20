@@ -9,9 +9,9 @@ def repl():
     parser = Parser()
     env = Environment()
     env.declare_var("x", NumberVal(10))
-    env.declare_var("true", BooleanVal())
-    env.declare_var("false", BooleanVal(False))
-    env.declare_var("null", NullVal())
+    env.declare_var("true", BooleanVal(), True)
+    env.declare_var("false", BooleanVal(False), True)
+    env.declare_var("null", NullVal(), True)
     print("\nRepl v0.1")
 
     while True:
@@ -30,7 +30,7 @@ def repl():
 
         try:
             program = parser.produce_ast(code)
-            # program.print()
+            program.print()
 
             rst = evaluate(program, env)
             print(rst)

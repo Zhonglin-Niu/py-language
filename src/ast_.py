@@ -4,7 +4,11 @@ from typing import Literal, TypedDict
 
 
 NodeType = Literal[
+    # STMT
     "Program",
+    "VarDeclaration",
+
+    # EXPR
     "NumericLiteral",
     "Identifier",
     "BinaryExpr",
@@ -15,26 +19,44 @@ class Stmt:
     def __init__(self, kind: NodeType) -> None:
         self.kind: NodeType = kind
 
+    def __repr__(self) -> str:
+        return str(self.__dict__)
+
+    def print(self) -> None:
+        repr = self.__repr__()
+        replaced_dict = {
+            "\'": "\"",
+            "True": "\"True\"",
+            "False": "\"False\"",
+            "None": "\"None\""
+        }
+        for key, item in replaced_dict.items():
+            repr = repr.replace(key, item)
+        
+        # print(repr)
+        print(json.dumps(json.loads(repr), indent=2))
+        # print(self.__dict__)
+            
+
+
+class Expr(Stmt):
+    pass
+
 
 class Program(Stmt):
     def __init__(self) -> None:
         super().__init__(kind="Program")
         self.body: list[Stmt] = []
 
-    def __repr__(self) -> str:
-        info_dict = {
-            "kind": self.kind,
-            "body": self.body
-        }
-        return str(info_dict)
-    
-    def print(self) -> None:
-        a = json.loads(self.__repr__().replace("'", "\""))
-        print(json.dumps(a, indent=2, ensure_ascii=False))
 
-
-class Expr(Stmt):
-    pass
+class VarDeclaration(Stmt):
+    def __init__(
+        self, is_const: bool, identifier: str, value: Expr | None = None
+    ) -> None:
+        super().__init__("VarDeclaration")
+        self.is_const = is_const
+        self.identifier = identifier
+        self.value = value
 
 
 class BinaryExpr(Expr):
@@ -44,38 +66,14 @@ class BinaryExpr(Expr):
         self.right = rightExpr
         self.operator = operator
 
-    def __repr__(self) -> str:
-        info_dict = {
-            "kind": self.kind,
-            "left": self.left,
-            "right": self.right,
-            "operator": self.operator
-        }
-        return str(info_dict)
-
 
 class Identifier(Expr):
     def __init__(self, symbol: str) -> None:
         super().__init__(kind="Identifier")
         self.symbol = symbol
 
-    def __repr__(self) -> str:
-        info_dict = {
-            "kind": self.kind,
-            "symbol": self.symbol
-        }
-        return str(info_dict)
-
 
 class NumericLiteral(Expr):
     def __init__(self, value: str) -> None:
         super().__init__("NumericLiteral")
         self.value = float(value)
-
-    def __repr__(self) -> str:
-        info_dict = {
-            "kind": self.kind,
-            "value": self.value
-        }
-        return str(info_dict)
-

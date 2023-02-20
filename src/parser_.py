@@ -17,11 +17,12 @@ class Parser:
     def eat(self) -> Token:
         return self.tokens.pop(0)
 
-    def expect(self, type_: TokenType) -> Token:
+    def expect(self, type_: TokenType, expect: str | None = None) -> Token:
         prev = self.eat()
+        expect = type_.value if expect is None else expect
         if prev.type != type_:
             raise ParseError(
-                f"Unexpected token found during parsing, expected \"{gr(type_.value)}\""
+                f"Unexpected token found during parsing, expected \"{gr(expect)}\""
             )
         return prev
 
@@ -37,7 +38,29 @@ class Parser:
 
     def parse_stmt(self) -> Stmt:
         # skip to parse expression
-        return self.parse_expr()
+        match self.at().type:
+            case TokenType.Let | TokenType.Const:
+                return self.parse_var_declaration()
+            case _:
+                return self.parse_expr()
+
+    def parse_var_declaration(self) -> Stmt:
+        # let ident;
+        # (let | const) ident = expr;
+        is_const = self.eat().type == TokenType.Const
+        identifier = self.expect(TokenType.Identifier, "an identifier").value
+
+        if self.at().type == TokenType.Semicolon:
+            self.eat()
+            if is_const:
+                raise ParseError(f"Constant variables must have an initialized value")
+            return VarDeclaration(is_const, identifier)
+        
+        self.expect(TokenType.Equals)
+        decalaration = VarDeclaration(is_const, identifier, self.parse_expr())
+        self.expect(TokenType.Semicolon)
+
+        return decalaration
 
     def parse_expr(self) -> Expr:
         return self.parse_additive_expr()
@@ -75,7 +98,7 @@ class Parser:
                 return value
             case _:
                 raise ParseError(
-                    f"Unexpected token found during parsing! -> {gr(self.at().value)}"
+                    f"Unexpected token found during parsing expr! -> {gr(self.at().value)}"
                 )
 
 

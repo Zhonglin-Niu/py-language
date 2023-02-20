@@ -12,12 +12,15 @@ class TokenType(Enum):
     OpenParen = "("
     CloseParen = ")"
     BinaryOperator = "+-*/%"
-    Let = "let"
     EOF = "EOF"
+    Let = "let"
+    Const = "const"
+    Semicolon = ";"
 
 
 KEYWORDS: dict[str, TokenType] = {
     "let": TokenType.Let,
+    "const": TokenType.Const
 }
 
 
@@ -57,6 +60,9 @@ def tokenize(source_code: str) -> list[Token]:
 
         elif src[0] == TokenType.Equals.value:
             tokens.append(Token(src.pop(0), TokenType.Equals))
+
+        elif src[0] == TokenType.Semicolon.value:
+            tokens.append(Token(src.pop(0), TokenType.Semicolon))
 
         else:
             # Handle multicharacter tokens
