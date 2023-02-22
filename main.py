@@ -1,11 +1,9 @@
+#!/home/loya/py-language/venv/bin/python
 from src.exceptions import *
 from src.parser_ import Parser
 from src.interpreter import *
 from src.environment import Environment
 from src.interpreter import BooleanVal
-
-import sys
-import traceback
 
 
 def repl():
