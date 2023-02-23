@@ -5,14 +5,11 @@ from src.interpreter import *
 from src.environment import Environment
 from src.interpreter import BooleanVal
 
+import sys
+
 
 def repl():
     parser = Parser()
-    env = Environment()
-    env.declare_var("x", NumberVal(10))
-    env.declare_var("true", BooleanVal(), True)
-    env.declare_var("false", BooleanVal(False), True)
-    env.declare_var("null", NullVal(), True)
     print("\nRepl v0.1")
 
     while True:
@@ -40,4 +37,21 @@ def repl():
 
 
 if __name__ == "__main__":
-    repl()
+    env = Environment()
+    d = Environment(env)
+    if len(sys.argv) > 1:
+        f = open(sys.argv[1])
+        codes = f.read()
+        f.close()
+
+        try:
+            parser = Parser()
+            program = parser.produce_ast(codes)
+            program.print()
+
+            rst = evaluate(program, env)
+            print(rst)
+        except PyException as e:
+            e.print()
+    else:
+        repl()

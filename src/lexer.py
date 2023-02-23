@@ -11,11 +11,15 @@ class TokenType(Enum):
     Equals = "="
     OpenParen = "("
     CloseParen = ")"
+    OpenBrace = "{"
+    CloseBrace = "}"
     BinaryOperator = "+-*/%"
     EOF = "EOF"
     Let = "let"
     Const = "const"
     Semicolon = ";"
+    Comma = ","
+    Colon = ":"
 
 
 KEYWORDS: dict[str, TokenType] = {
@@ -54,6 +58,18 @@ def tokenize(source_code: str) -> list[Token]:
 
         elif src[0] == TokenType.CloseParen.value:
             tokens.append(Token(src.pop(0), TokenType.CloseParen))
+
+        elif src[0] == TokenType.OpenBrace.value:
+            tokens.append(Token(src.pop(0), TokenType.OpenBrace))
+
+        elif src[0] == TokenType.CloseBrace.value:
+            tokens.append(Token(src.pop(0), TokenType.CloseBrace))
+
+        elif src[0] == TokenType.Colon.value:
+            tokens.append(Token(src.pop(0), TokenType.Colon))
+
+        elif src[0] == TokenType.Comma.value:
+            tokens.append(Token(src.pop(0), TokenType.Comma))
 
         elif src[0] in TokenType.BinaryOperator.value:
             tokens.append(Token(src.pop(0), TokenType.BinaryOperator))

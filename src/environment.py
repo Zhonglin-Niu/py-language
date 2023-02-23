@@ -12,6 +12,13 @@ class Environment:
         self.__parent = parent
         self.__variables: dict[str, RuntimeVal] = {}
         self.__constants: set[str] = set()
+        self.set_globals_if_needed()
+
+    def set_globals_if_needed(self) -> None:
+        if not self.__parent:
+            self.declare_var("true", BooleanVal(), True)
+            self.declare_var("false", BooleanVal(False), True)
+            self.declare_var("null", NullVal(), True)
 
     def declare_var(
         self, var_name: str, value: RuntimeVal, is_const: bool = False
