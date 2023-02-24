@@ -54,15 +54,29 @@ def eval_assignment(assignment: AssignmentExpr, env: Environment) -> RuntimeVal:
     assert isinstance(assignment.assign, Identifier)
     return env.assign_var(assignment.assign.symbol, evaluate(assignment.value, env))
 
+def eval_object_expr(obj: ObjectLiteral, env: Environment) -> RuntimeVal:
+    object = ObjectVal()
+    
+    for item in obj.properties:
+        value = env.lookup_var(item.key) if not item.value else evaluate(item.value, env)
+        object.properties.update({item.key: value})
+
+    return object
 
 def evaluate(astNode: Stmt, env: Environment) -> RuntimeVal:
     match astNode.kind:
         case "NumericLiteral":
             assert isinstance(astNode, NumericLiteral)
             return NumberVal(astNode.value)
+        case "StringLiteral":
+            assert isinstance(astNode, StringLiteral)
+            return StringVal(astNode.value)
         case "Identifier":
             assert isinstance(astNode, Identifier)
             return eval_identifier(astNode, env)
+        case "ObjectLiteral":
+            assert isinstance(astNode, ObjectLiteral)
+            return eval_object_expr(astNode, env)
         case "BinaryExpr":
             assert isinstance(astNode, BinaryExpr)
             return eval_binary_expr(astNode, env)

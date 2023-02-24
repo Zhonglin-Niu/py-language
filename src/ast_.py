@@ -9,10 +9,13 @@ NodeType = Literal[
     "VarDeclaration",
 
     # EXPR
-    "NumericLiteral",
     "Identifier",
+    "Property",
+    "NumericLiteral",
+    "StringLiteral",
     "AssignmentExpr",
     "BinaryExpr",
+    "ObjectLiteral"
 ]
 
 
@@ -70,6 +73,11 @@ class NumericLiteral(Expr):
         super().__init__("NumericLiteral")
         self.value = float(value)
 
+class StringLiteral(Expr):
+    def __init__(self, value: str) -> None:
+        super().__init__("StringLiteral")
+        self.value = value
+
 
 class BinaryExpr(Expr):
     def __init__(self, leftExpr: Expr, rightExpr: Expr, operator: str) -> None:
@@ -90,3 +98,17 @@ class AssignmentExpr(Expr):
         super().__init__("AssignmentExpr")
         self.assign = assign
         self.value = value
+
+
+
+class Property(Expr):
+    def __init__(self, key:str, value: Expr | None = None) -> None:
+        super().__init__("Property")
+        self.key = key
+        self.value = value
+
+
+class ObjectLiteral(Expr):
+    def __init__(self, properties: list[Property]) -> None:
+        super().__init__("ObjectLiteral")
+        self.properties = properties

@@ -4,7 +4,9 @@ from typing import Literal
 ValueType = Literal[
     "null",
     "number",
-    "boolean"
+    "string",
+    "boolean",
+    "object"
 ]
 
 
@@ -15,7 +17,6 @@ class RuntimeVal:
 
     def __repr__(self) -> str:
         return str(self.__dict__)
-        return str(self.type) + str(self.value)
 
 
 class NullVal(RuntimeVal):
@@ -29,7 +30,19 @@ class NumberVal(RuntimeVal):
         super().__init__("number")
         self.value = value
 
+class StringVal(RuntimeVal):
+    def __init__(self, value: str) -> None:
+        super().__init__("string")
+        self.value = value
+
+
 class BooleanVal(RuntimeVal):
     def __init__(self, value: bool = True) -> None:
         super().__init__("boolean")
         self.value = value
+
+
+class ObjectVal(RuntimeVal):
+    def __init__(self) -> None:
+        super().__init__("object")
+        self.properties: dict[str, RuntimeVal] = {}

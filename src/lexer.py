@@ -20,6 +20,8 @@ class TokenType(Enum):
     Semicolon = ";"
     Comma = ","
     Colon = ":"
+    Quotation = "\""
+    String = ""
 
 
 KEYWORDS: dict[str, TokenType] = {
@@ -45,6 +47,12 @@ class Token:
             return f"<{self.type.name}: {self.value}>"
         else:
             return self.__repr__()
+
+
+def is_valid_ident_char(char: str, is_first_ident_char=False) -> bool:
+    if is_first_ident_char:
+        return char in TokenType.Identifier.value
+    return char in TokenType.Identifier.value + string.digits
 
 
 def tokenize(source_code: str) -> list[Token]:
@@ -91,9 +99,9 @@ def tokenize(source_code: str) -> list[Token]:
 
                 tokens.append(Token(num, TokenType.Number))
 
-            elif src[0].isalpha():
+            elif is_valid_ident_char(src[0], True):
                 identifier = ""
-                while (len(src) > 0 and src[0].isalpha()):
+                while (len(src) > 0 and is_valid_ident_char(src[0])):
                     identifier += src.pop(0)
 
                 # check for reserved keywords
@@ -103,8 +111,17 @@ def tokenize(source_code: str) -> list[Token]:
                     tokens.append(Token(identifier, reserved))
                 else:
                     tokens.append(Token(identifier, TokenType.Identifier))
+            
+            elif src[0] == TokenType.Quotation.value:
+                text = ""
+                src.pop(0)
+                while (len(src) > 0 and src[0] != TokenType.Quotation.value):
+                    text += src.pop(0)
+                src.pop(0)
+                tokens.append(Token(text, TokenType.String))
+                
 
-            elif src[0] in " \n\t":  # skippable
+            elif src[0] in " \n\t\r":  # skippable
                 src.pop(0)
 
             else:

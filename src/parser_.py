@@ -66,7 +66,7 @@ class Parser:
         return self.parse_assignment_expr()
     
     def parse_assignment_expr(self) -> Expr:
-        left = self.parse_additive_expr()
+        left = self.parse_obj_expr()
 
         if self.at().type == TokenType.Equals:
             self.eat()
@@ -74,6 +74,34 @@ class Parser:
             return AssignmentExpr(left, value)
         
         return left
+    
+    def parse_obj_expr(self) -> Expr:
+        if self.at().type != TokenType.OpenBrace:
+            return self.parse_additive_expr()
+        
+        self.eat()
+
+        properties: list[Property] = []
+
+        # parse each key-value pairs
+        while self.not_eof() and self.at().type != TokenType.CloseBrace:
+            key = self.expect(TokenType.Identifier, "an identifier as key of an object").value
+            if self.at().type == TokenType.Comma:
+                self.eat()
+                properties.append(Property(key))
+                continue
+            elif self.at().type == TokenType.CloseBrace:
+                properties.append(Property(key))
+                continue
+
+            self.expect(TokenType.Colon)
+            value = self.parse_expr()
+            properties.append(Property(key, value))
+
+            if self.at().type != TokenType.CloseBrace:
+                self.expect(TokenType.Comma)
+        self.expect(TokenType.CloseBrace)
+        return ObjectLiteral(properties)
 
     def parse_additive_expr(self) -> Expr:
         left = self.parse_multiplicative_expr()
@@ -106,6 +134,8 @@ class Parser:
                 value = self.parse_expr()
                 self.expect(TokenType.CloseParen)
                 return value
+            case TokenType.String:
+                return StringLiteral(self.eat().value)
             case _:
                 raise ParseError(
                     f"Unexpected token found during parsing expr! -> {gr(self.at().value)}"

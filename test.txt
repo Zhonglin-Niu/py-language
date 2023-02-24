@@ -1,10 +1,11 @@
 const foo = 30 / 2;
 
 const obj = {
-    x: 100,
+    name: "Amy",
     y: 32,
     foo,
     complex: {
-        bar: true,
+        is_human: true,
+        is_girl: false,
     }
 };
