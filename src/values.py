@@ -29,6 +29,7 @@ class NumberVal(RuntimeVal):
         super().__init__("number")
         self.value = value
 
+
 class StringVal(RuntimeVal):
     def __init__(self, value: str) -> None:
         super().__init__("string")
