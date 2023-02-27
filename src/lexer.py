@@ -117,7 +117,10 @@ def tokenize(source_code: str) -> list[Token]:
                 src.pop(0)
                 while (len(src) > 0 and src[0] != TokenType.Quotation.value):
                     text += src.pop(0)
-                src.pop(0)
+                try:
+                    src.pop(0)
+                except:
+                    raise TokenizeError(f"Expected \"{gr(TokenType.Quotation.value)}\" on the both end of a string")
                 tokens.append(Token(text, TokenType.String))
                 
 

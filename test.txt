@@ -9,3 +9,5 @@ const obj = {
         is_girl: false,
     }
 };
+
+const names = ["Loya", "Amy", foo];

@@ -3,15 +3,15 @@ from src.exceptions import *
 from src.parser_ import Parser
 from src.interpreter import *
 from src.environment import Environment
-from src.interpreter import BooleanVal
-
+import readline
 import sys
 
 
 def repl():
+    readline.read_history_file(".input_history")
+
     parser = Parser()
     print("\nRepl v0.1")
-
     while True:
         try:
             code = input(">>>")
@@ -34,6 +34,8 @@ def repl():
             print(rst)
         except PyException as e:
             e.print()
+
+    readline.append_history_file(999, ".input_history")
 
 
 if __name__ == "__main__":

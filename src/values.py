@@ -13,7 +13,6 @@ ValueType = Literal[
 class RuntimeVal:
     def __init__(self, type_: ValueType) -> None:
         self.type = type_
-        self.value: object = ""
 
     def __repr__(self) -> str:
         return str(self.__dict__)
