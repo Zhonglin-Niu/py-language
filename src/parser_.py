@@ -53,9 +53,10 @@ class Parser:
         if self.at().type == TokenType.Semicolon:
             self.eat()
             if is_const:
-                raise ParseError(f"Constant variables must have an initialized value")
+                raise ParseError(
+                    f"Constant variables must have an initialized value")
             return VarDeclaration(is_const, identifier)
-        
+
         self.expect(TokenType.Equals)
         decalaration = VarDeclaration(is_const, identifier, self.parse_expr())
         self.expect(TokenType.Semicolon)
@@ -64,7 +65,7 @@ class Parser:
 
     def parse_expr(self) -> Expr:
         return self.parse_assignment_expr()
-    
+
     def parse_assignment_expr(self) -> Expr:
         left = self.parse_obj_expr()
 
@@ -72,36 +73,51 @@ class Parser:
             self.eat()
             value = self.parse_assignment_expr()
             return AssignmentExpr(left, value)
-        
+
         return left
-    
+
     def parse_obj_expr(self) -> Expr:
-        if self.at().type != TokenType.OpenBrace:
+        if self.at().type not in [TokenType.OpenBrace, TokenType.OpenBracket]:
             return self.parse_additive_expr()
+
+        if self.eat().type == TokenType.OpenBrace:
+            properties: list[Property] = []
+
+            # parse each key-value pairs
+            while self.not_eof() and self.at().type != TokenType.CloseBrace:
+                key = self.expect(TokenType.Identifier,
+                                  "an identifier as key of an object").value
+                if self.at().type == TokenType.Comma:
+                    self.eat()
+                    properties.append(Property(key))
+                    continue
+                elif self.at().type == TokenType.CloseBrace:
+                    properties.append(Property(key))
+                    continue
+
+                self.expect(TokenType.Colon)
+                value = self.parse_expr()
+                properties.append(Property(key, value))
+
+                if self.at().type != TokenType.CloseBrace:
+                    self.expect(TokenType.Comma)
+            self.expect(TokenType.CloseBrace)
+            return ObjectLiteral(properties)
         
-        self.eat()
+        # must be self.eat().type == TokenType.OpenBracket
+        else:
+            listLiteral = ListLiteral()
 
-        properties: list[Property] = []
+            while self.not_eof() and self.at().type != TokenType.CloseBracket:
+                item = self.parse_expr()
+                listLiteral.body.append(item)
 
-        # parse each key-value pairs
-        while self.not_eof() and self.at().type != TokenType.CloseBrace:
-            key = self.expect(TokenType.Identifier, "an identifier as key of an object").value
-            if self.at().type == TokenType.Comma:
-                self.eat()
-                properties.append(Property(key))
-                continue
-            elif self.at().type == TokenType.CloseBrace:
-                properties.append(Property(key))
-                continue
+                if self.at().type != TokenType.CloseBracket:
+                    self.expect(TokenType.Comma)
+            
+            self.expect(TokenType.CloseBracket)
+            return listLiteral
 
-            self.expect(TokenType.Colon)
-            value = self.parse_expr()
-            properties.append(Property(key, value))
-
-            if self.at().type != TokenType.CloseBrace:
-                self.expect(TokenType.Comma)
-        self.expect(TokenType.CloseBrace)
-        return ObjectLiteral(properties)
 
     def parse_additive_expr(self) -> Expr:
         left = self.parse_multiplicative_expr()

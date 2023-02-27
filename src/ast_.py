@@ -15,7 +15,8 @@ NodeType = Literal[
     "StringLiteral",
     "AssignmentExpr",
     "BinaryExpr",
-    "ObjectLiteral"
+    "ObjectLiteral",
+    "ListLiteral"
 ]
 
 
@@ -112,3 +113,9 @@ class ObjectLiteral(Expr):
     def __init__(self, properties: list[Property]) -> None:
         super().__init__("ObjectLiteral")
         self.properties = properties
+
+
+class ListLiteral(Expr):
+    def __init__(self) -> None:
+        super().__init__("ListLiteral")
+        self.body: list[Expr] = [] 

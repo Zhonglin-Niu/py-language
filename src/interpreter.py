@@ -63,6 +63,20 @@ def eval_object_expr(obj: ObjectLiteral, env: Environment) -> RuntimeVal:
 
     return object
 
+def eval_list_expr(arr: ListLiteral, env: Environment) -> RuntimeVal:
+    array = ListVal()
+
+    for item in arr.body:
+        if item.kind == "Identifier":
+            assert isinstance(item, Identifier)
+            value = env.lookup_var(item.symbol)
+        else:
+            value = evaluate(item, env)
+
+        array.items.append(value)
+    
+    return array
+
 def evaluate(astNode: Stmt, env: Environment) -> RuntimeVal:
     match astNode.kind:
         case "NumericLiteral":
@@ -77,6 +91,9 @@ def evaluate(astNode: Stmt, env: Environment) -> RuntimeVal:
         case "ObjectLiteral":
             assert isinstance(astNode, ObjectLiteral)
             return eval_object_expr(astNode, env)
+        case "ListLiteral":
+            assert isinstance(astNode, ListLiteral)
+            return eval_list_expr(astNode, env)
         case "BinaryExpr":
             assert isinstance(astNode, BinaryExpr)
             return eval_binary_expr(astNode, env)

@@ -6,7 +6,8 @@ ValueType = Literal[
     "number",
     "string",
     "boolean",
-    "object"
+    "object",
+    "list"
 ]
 
 
@@ -46,3 +47,9 @@ class ObjectVal(RuntimeVal):
     def __init__(self) -> None:
         super().__init__("object")
         self.properties: dict[str, RuntimeVal] = {}
+
+
+class ListVal(RuntimeVal):
+    def __init__(self) -> None:
+        super().__init__("list")
+        self.items: list[RuntimeVal] = []

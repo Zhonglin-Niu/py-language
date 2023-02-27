@@ -13,6 +13,8 @@ class TokenType(Enum):
     CloseParen = ")"
     OpenBrace = "{"
     CloseBrace = "}"
+    OpenBracket = "["
+    CloseBracket = "]"
     BinaryOperator = "+-*/%"
     EOF = "EOF"
     Let = "let"
@@ -73,6 +75,12 @@ def tokenize(source_code: str) -> list[Token]:
         elif src[0] == TokenType.CloseBrace.value:
             tokens.append(Token(src.pop(0), TokenType.CloseBrace))
 
+        elif src[0] == TokenType.OpenBracket.value:
+            tokens.append(Token(src.pop(0), TokenType.OpenBracket))
+
+        elif src[0] == TokenType.CloseBracket.value:
+            tokens.append(Token(src.pop(0), TokenType.CloseBracket))
+
         elif src[0] == TokenType.Colon.value:
             tokens.append(Token(src.pop(0), TokenType.Colon))
 
@@ -111,7 +119,7 @@ def tokenize(source_code: str) -> list[Token]:
                     tokens.append(Token(identifier, reserved))
                 else:
                     tokens.append(Token(identifier, TokenType.Identifier))
-            
+
             elif src[0] == TokenType.Quotation.value:
                 text = ""
                 src.pop(0)
@@ -120,9 +128,9 @@ def tokenize(source_code: str) -> list[Token]:
                 try:
                     src.pop(0)
                 except:
-                    raise TokenizeError(f"Expected \"{gr(TokenType.Quotation.value)}\" on the both end of a string")
+                    raise TokenizeError(
+                        f"Expected \"{gr(TokenType.Quotation.value)}\" on the both end of a string")
                 tokens.append(Token(text, TokenType.String))
-                
 
             elif src[0] in " \n\t\r":  # skippable
                 src.pop(0)
