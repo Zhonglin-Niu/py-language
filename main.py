@@ -28,10 +28,10 @@ def repl():
 
         try:
             program = parser.produce_ast(code)
-            # program.print()
 
             rst = evaluate(program, env)
-            print(rst)
+            if not isinstance(rst, NullVal):
+                print(rst)
         except PyException as e:
             e.print()
 
@@ -49,10 +49,10 @@ if __name__ == "__main__":
         try:
             parser = Parser()
             program = parser.produce_ast(codes)
-            program.print()
+            # program.print()
 
             rst = evaluate(program, env)
-            print(rst)
+            # print(rst)
         except PyException as e:
             e.print()
     else:

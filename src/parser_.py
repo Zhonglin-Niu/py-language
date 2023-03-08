@@ -130,14 +130,73 @@ class Parser:
         return left
 
     def parse_multiplicative_expr(self) -> Expr:
-        left = self.parse_primary_expr()
+        left = self.parse_call_member_expr()
 
         while self.at().value in "*/%":
             operator = self.eat().value
-            right = self.parse_primary_expr()
+            right = self.parse_call_member_expr()
             left = BinaryExpr(left, right, operator)
 
         return left
+    
+    def parse_call_member_expr(self) -> Expr:
+        member = self.parse_member_expr()
+
+        if self.at().type == TokenType.OpenParen:
+            return self.parse_call_expr(member)
+        
+        return member
+    
+    def parse_call_expr(self, caller: Expr) -> Expr:
+        args = self.parse_args()
+        call_expr: Expr = CallExpr(args, caller)
+
+        if self.at().type == TokenType.OpenParen:
+            call_expr = self.parse_call_expr(call_expr)
+
+        return call_expr
+    
+    def parse_args(self) -> list[Expr]:
+        self.expect(TokenType.OpenParen)
+
+        if self.at().type == TokenType.CloseParen:
+            args = []
+        else:
+            args = self.parse_arguments_list()
+        
+        self.expect(TokenType.CloseParen)
+        
+        return args
+    
+    def parse_arguments_list(self) -> list[Expr]:
+        args = [self.parse_assignment_expr()]
+
+        while self.at().type == TokenType.Comma and self.eat():
+            args.append(self.parse_assignment_expr())
+        
+        return args
+    
+    def parse_member_expr(self) -> Expr:
+        obj = self.parse_primary_expr()
+
+        while self.at().type in [TokenType.Dot, TokenType.CloseBracket]:
+            operator = self.eat()
+            
+            if operator.type == TokenType.Dot:
+                computed = False
+                prop = self.parse_primary_expr()
+
+                if prop.kind != "Identifier":
+                    raise ParseError("Can't use dot operator without right hand side being an identifier")
+            
+            else:
+                computed = True
+                prop = self.parse_expr()
+                self.expect(TokenType.CloseBracket)
+
+            obj = MemberExpr(obj, prop, computed)
+        
+        return obj
 
     def parse_primary_expr(self) -> Expr:
         match self.at().type:

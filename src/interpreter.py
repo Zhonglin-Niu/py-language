@@ -77,6 +77,20 @@ def eval_list_expr(arr: ListLiteral, env: Environment) -> RuntimeVal:
     
     return array
 
+def eval_call_expr(expr: CallExpr, env: Environment) -> RuntimeVal:
+    fn = evaluate(expr.caller, env)
+
+    if fn.type != "native-fn":
+        raise InterpretError(f"Function {fn} is not implemented")
+    
+    args: list[RuntimeVal] = []
+    for arg in expr.args:
+        args.append(evaluate(arg, env))
+
+    assert isinstance(fn, NativeFnValue)
+    rst = fn.call(args, env)
+    return rst
+
 def evaluate(astNode: Stmt, env: Environment) -> RuntimeVal:
     match astNode.kind:
         case "NumericLiteral":
@@ -91,6 +105,9 @@ def evaluate(astNode: Stmt, env: Environment) -> RuntimeVal:
         case "ObjectLiteral":
             assert isinstance(astNode, ObjectLiteral)
             return eval_object_expr(astNode, env)
+        case "CallExpr":
+            assert isinstance(astNode, CallExpr)
+            return eval_call_expr(astNode, env)
         case "ListLiteral":
             assert isinstance(astNode, ListLiteral)
             return eval_list_expr(astNode, env)

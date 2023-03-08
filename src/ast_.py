@@ -14,6 +14,8 @@ NodeType = Literal[
     "NumericLiteral",
     "StringLiteral",
     "AssignmentExpr",
+    "MemberExpr",
+    "CallExpr",
     "BinaryExpr",
     "ObjectLiteral",
     "ListLiteral"
@@ -74,6 +76,7 @@ class NumericLiteral(Expr):
         super().__init__("NumericLiteral")
         self.value = float(value)
 
+
 class StringLiteral(Expr):
     def __init__(self, value: str) -> None:
         super().__init__("StringLiteral")
@@ -101,9 +104,23 @@ class AssignmentExpr(Expr):
         self.value = value
 
 
+class CallExpr(Expr):
+    def __init__(self, args: list[Expr], caller: Expr) -> None:
+        super().__init__("CallExpr")
+        self.args: list[Expr] = args
+        self.caller: Expr = caller
+
+
+class MemberExpr(Expr):
+    def __init__(self, obj: Expr, prop: Expr, computed: bool) -> None:
+        super().__init__("MemberExpr")
+        self.obj: Expr = obj
+        self.prop: Expr = prop
+        self.computed: bool = computed
+
 
 class Property(Expr):
-    def __init__(self, key:str, value: Expr | None = None) -> None:
+    def __init__(self, key: str, value: Expr | None = None) -> None:
         super().__init__("Property")
         self.key = key
         self.value = value
@@ -118,4 +135,4 @@ class ObjectLiteral(Expr):
 class ListLiteral(Expr):
     def __init__(self) -> None:
         super().__init__("ListLiteral")
-        self.body: list[Expr] = [] 
+        self.body: list[Expr] = []

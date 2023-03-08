@@ -21,6 +21,7 @@ class TokenType(Enum):
     Const = "const"
     Semicolon = ";"
     Comma = ","
+    Dot = "."
     Colon = ":"
     Quotation = "\""
     String = ""
@@ -86,6 +87,9 @@ def tokenize(source_code: str) -> list[Token]:
 
         elif src[0] == TokenType.Comma.value:
             tokens.append(Token(src.pop(0), TokenType.Comma))
+
+        elif src[0] == TokenType.Dot.value:
+            tokens.append(Token(src.pop(0), TokenType.Dot))
 
         elif src[0] in TokenType.BinaryOperator.value:
             tokens.append(Token(src.pop(0), TokenType.BinaryOperator))

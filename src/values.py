@@ -1,4 +1,5 @@
-from typing import Literal
+from typing import Callable, Literal
+from .environment import *
 
 
 ValueType = Literal[
@@ -7,7 +8,8 @@ ValueType = Literal[
     "string",
     "boolean",
     "object",
-    "list"
+    "list",
+    "native-fn"
 ]
 
 
@@ -53,3 +55,14 @@ class ListVal(RuntimeVal):
     def __init__(self) -> None:
         super().__init__("list")
         self.items: list[RuntimeVal] = []
+
+
+class NativeFnValue(RuntimeVal):
+    def __init__(self, func: Callable[..., RuntimeVal]) -> None:
+        super().__init__("native-fn")
+        self.call = func
+
+    # def call(
+    #         self, func: Callable, args: list[RuntimeVal], env: Environment
+    # ) -> RuntimeVal:
+    #     return func(args, env)

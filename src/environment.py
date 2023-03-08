@@ -1,10 +1,19 @@
-from .values import *
+from .values import NullVal, NumberVal, RuntimeVal, BooleanVal, NativeFnValue
 from typing import TypeVar
 from .exceptions import *
 from .colored_text import *
-from .values import RuntimeVal
 
 EnvironmentType = TypeVar('EnvironmentType', bound='Environment')
+
+
+class Funcs:
+    def print(self, args, env: EnvironmentType) -> NullVal:
+        print(args)
+        return NullVal()
+    
+    def max(self, args: list[NumberVal], env: EnvironmentType) -> NumberVal:
+        nums = [number.value for number in args]
+        return NumberVal(max(nums))
 
 
 class Environment:
@@ -16,9 +25,12 @@ class Environment:
 
     def set_globals_if_needed(self) -> None:
         if not self.__parent:
+            f = Funcs()
             self.declare_var("true", BooleanVal(), True)
             self.declare_var("false", BooleanVal(False), True)
             self.declare_var("null", NullVal(), True)
+            self.declare_var("print", NativeFnValue(f.print), True)
+            self.declare_var("max", NativeFnValue(f.max), True)
 
     def declare_var(
         self, var_name: str, value: RuntimeVal, is_const: bool = False

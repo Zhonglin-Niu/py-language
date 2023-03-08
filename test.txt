@@ -11,3 +11,7 @@ const obj = {
 };
 
 const names = ["Loya", "Amy", foo, foo = 5, ];
+
+print(foo)
+
+print(max(1, 0))
