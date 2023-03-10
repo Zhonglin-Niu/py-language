@@ -28,7 +28,7 @@ def repl():
 
         try:
             program = parser.produce_ast(code)
-
+            # program.print()
             rst = evaluate(program, env)
             if not isinstance(rst, NullVal):
                 print(rst)

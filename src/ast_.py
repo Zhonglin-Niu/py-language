@@ -7,6 +7,7 @@ NodeType = Literal[
     # STMT
     "Program",
     "VarDeclaration",
+    "FunctionDeclaration",
 
     # EXPR
     "Identifier",
@@ -63,6 +64,14 @@ class VarDeclaration(Stmt):
         self.is_const = is_const
         self.identifier = identifier
         self.value = value
+
+
+class FunctionDeclaration(Stmt):
+    def __init__(self, parameters: list[str], name: str, body: list[Stmt]) -> None:
+        super().__init__("FunctionDeclaration")
+        self.parameters = parameters
+        self.name = name
+        self.body = body
 
 
 class Identifier(Expr):

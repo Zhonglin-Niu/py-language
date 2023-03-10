@@ -47,6 +47,13 @@ def eval_var_declaration(declaration: VarDeclaration, env: Environment) -> Runti
     return env.declare_var(declaration.identifier, value, declaration.is_const)
 
 
+def eval_func_declaration(declaration: FunctionDeclaration, env: Environment) -> RuntimeVal:
+    fn = FunctionValue(
+        declaration.name, declaration.parameters, env, declaration.body)
+
+    return env.declare_var(declaration.name, fn, True)
+
+
 def eval_assignment(assignment: AssignmentExpr, env: Environment) -> RuntimeVal:
     if assignment.assign.kind != "Identifier":
         raise InterpretError(f"Invalid assigned object")
@@ -54,14 +61,17 @@ def eval_assignment(assignment: AssignmentExpr, env: Environment) -> RuntimeVal:
     assert isinstance(assignment.assign, Identifier)
     return env.assign_var(assignment.assign.symbol, evaluate(assignment.value, env))
 
+
 def eval_object_expr(obj: ObjectLiteral, env: Environment) -> RuntimeVal:
     object = ObjectVal()
-    
+
     for item in obj.properties:
-        value = env.lookup_var(item.key) if not item.value else evaluate(item.value, env)
+        value = env.lookup_var(
+            item.key) if not item.value else evaluate(item.value, env)
         object.properties.update({item.key: value})
 
     return object
+
 
 def eval_list_expr(arr: ListLiteral, env: Environment) -> RuntimeVal:
     array = ListVal()
@@ -74,22 +84,33 @@ def eval_list_expr(arr: ListLiteral, env: Environment) -> RuntimeVal:
             value = evaluate(item, env)
 
         array.items.append(value)
-    
+
     return array
+
 
 def eval_call_expr(expr: CallExpr, env: Environment) -> RuntimeVal:
     fn = evaluate(expr.caller, env)
-
-    if fn.type != "native-fn":
-        raise InterpretError(f"Function {fn} is not implemented")
-    
     args: list[RuntimeVal] = []
     for arg in expr.args:
         args.append(evaluate(arg, env))
 
-    assert isinstance(fn, NativeFnValue)
-    rst = fn.call(args, env)
-    return rst
+    if fn.type == "native-fn":
+        assert isinstance(fn, NativeFnValue)
+        rst_ = fn.call(args, env)
+        return rst_
+    elif fn.type == "function":
+        assert isinstance(fn, FunctionValue)
+        scope = Environment(env.parent)
+        for (i, param) in enumerate(fn.parameters):
+            scope.declare_var(param, args[i], False)
+
+        rst: RuntimeVal = NullVal()
+
+        for stmt in fn.body:
+            rst = evaluate(stmt, scope)
+        return rst
+    raise InterpretError(f"Function {fn} is not implemented")
+
 
 def evaluate(astNode: Stmt, env: Environment) -> RuntimeVal:
     match astNode.kind:
@@ -120,6 +141,9 @@ def evaluate(astNode: Stmt, env: Environment) -> RuntimeVal:
         case "VarDeclaration":
             assert isinstance(astNode, VarDeclaration)
             return eval_var_declaration(astNode, env)
+        case "FunctionDeclaration":
+            assert isinstance(astNode, FunctionDeclaration)
+            return eval_func_declaration(astNode, env)
         case "AssignmentExpr":
             assert isinstance(astNode, AssignmentExpr)
             return eval_assignment(astNode, env)

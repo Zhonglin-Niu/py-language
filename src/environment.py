@@ -1,4 +1,4 @@
-from .values import NullVal, NumberVal, RuntimeVal, BooleanVal, NativeFnValue
+from .values import NullVal, NumberVal, RuntimeVal, BooleanVal, NativeFnValue, FunctionValue
 from typing import TypeVar
 from .exceptions import *
 from .colored_text import *
@@ -10,7 +10,7 @@ class Funcs:
     def print(self, args, env: EnvironmentType) -> NullVal:
         print(args)
         return NullVal()
-    
+
     def max(self, args: list[NumberVal], env: EnvironmentType) -> NumberVal:
         nums = [number.value for number in args]
         return NumberVal(max(nums))
@@ -18,13 +18,13 @@ class Funcs:
 
 class Environment:
     def __init__(self, parent: EnvironmentType | None = None) -> None:
-        self.__parent = parent
+        self.parent = parent
         self.__variables: dict[str, RuntimeVal] = {}
         self.__constants: set[str] = set()
         self.set_globals_if_needed()
 
     def set_globals_if_needed(self) -> None:
-        if not self.__parent:
+        if not self.parent:
             f = Funcs()
             self.declare_var("true", BooleanVal(), True)
             self.declare_var("false", BooleanVal(False), True)
@@ -70,8 +70,8 @@ class Environment:
         if self.__variables.get(var_name):
             return self
 
-        if not self.__parent:
+        if not self.parent:
             raise RuntimeError(
                 f"Can't resolve {gr(var_name)} as it is undefined.")
 
-        return self.__parent.resolve(var_name)
+        return self.parent.resolve(var_name)

@@ -28,7 +28,6 @@ class Parser:
 
     def produce_ast(self, source_code: str) -> Program:
         self.tokens = tokenize(source_code)
-        # print(self.tokens)
         program = Program()
 
         # Parse until the end of the file
@@ -41,6 +40,8 @@ class Parser:
         match self.at().type:
             case TokenType.Let | TokenType.Const:
                 return self.parse_var_declaration()
+            case TokenType.Fn:
+                return self.parse_fn_declaration()
             case _:
                 return self.parse_expr()
 
@@ -62,6 +63,29 @@ class Parser:
         self.expect(TokenType.Semicolon)
 
         return decalaration
+
+    def parse_fn_declaration(self) -> Stmt:
+        self.eat()
+        name = self.expect(TokenType.Identifier, "function name after fn keyword").value
+        args = self.parse_args()
+        params: list[str] = []
+
+        for arg in args:
+            if arg.kind != "Identifier":
+                raise ParseError("Inside function declaration expected parameters to be a type of string")
+            assert isinstance(arg, Identifier)
+            params.append(arg.symbol)
+
+        self.expect(TokenType.OpenBrace)
+        body: list[Stmt] = []
+
+        while self.at().type not in [TokenType.EOF, TokenType.CloseBrace]:
+            body.append(self.parse_stmt())
+
+        self.expect(TokenType.CloseBrace)
+
+        fn = FunctionDeclaration(params, name, body)
+        return fn
 
     def parse_expr(self) -> Expr:
         return self.parse_assignment_expr()
@@ -103,7 +127,7 @@ class Parser:
                     self.expect(TokenType.Comma)
             self.expect(TokenType.CloseBrace)
             return ObjectLiteral(properties)
-        
+
         # must be self.eat().type == TokenType.OpenBracket
         else:
             listLiteral = ListLiteral()
@@ -114,10 +138,9 @@ class Parser:
 
                 if self.at().type != TokenType.CloseBracket:
                     self.expect(TokenType.Comma)
-            
+
             self.expect(TokenType.CloseBracket)
             return listLiteral
-
 
     def parse_additive_expr(self) -> Expr:
         left = self.parse_multiplicative_expr()
@@ -138,15 +161,15 @@ class Parser:
             left = BinaryExpr(left, right, operator)
 
         return left
-    
+
     def parse_call_member_expr(self) -> Expr:
         member = self.parse_member_expr()
 
         if self.at().type == TokenType.OpenParen:
             return self.parse_call_expr(member)
-        
+
         return member
-    
+
     def parse_call_expr(self, caller: Expr) -> Expr:
         args = self.parse_args()
         call_expr: Expr = CallExpr(args, caller)
@@ -155,7 +178,7 @@ class Parser:
             call_expr = self.parse_call_expr(call_expr)
 
         return call_expr
-    
+
     def parse_args(self) -> list[Expr]:
         self.expect(TokenType.OpenParen)
 
@@ -163,39 +186,40 @@ class Parser:
             args = []
         else:
             args = self.parse_arguments_list()
-        
+
         self.expect(TokenType.CloseParen)
-        
+
         return args
-    
+
     def parse_arguments_list(self) -> list[Expr]:
         args = [self.parse_assignment_expr()]
 
         while self.at().type == TokenType.Comma and self.eat():
             args.append(self.parse_assignment_expr())
-        
+
         return args
-    
+
     def parse_member_expr(self) -> Expr:
         obj = self.parse_primary_expr()
 
         while self.at().type in [TokenType.Dot, TokenType.CloseBracket]:
             operator = self.eat()
-            
+
             if operator.type == TokenType.Dot:
                 computed = False
                 prop = self.parse_primary_expr()
 
                 if prop.kind != "Identifier":
-                    raise ParseError("Can't use dot operator without right hand side being an identifier")
-            
+                    raise ParseError(
+                        "Can't use dot operator without right hand side being an identifier")
+
             else:
                 computed = True
                 prop = self.parse_expr()
                 self.expect(TokenType.CloseBracket)
 
             obj = MemberExpr(obj, prop, computed)
-        
+
         return obj
 
     def parse_primary_expr(self) -> Expr:

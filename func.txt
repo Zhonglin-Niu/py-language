@@ -1,0 +1,12 @@
+fn add(x, y) {
+    fn subtract() {
+        2
+    }
+    let result = x + y;
+    print(result - 2)
+    result + subtract()
+}
+
+const rst = add(10, 4);
+
+print(rst)

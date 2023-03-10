@@ -25,11 +25,13 @@ class TokenType(Enum):
     Colon = ":"
     Quotation = "\""
     String = ""
+    Fn = "fn"
 
 
 KEYWORDS: dict[str, TokenType] = {
     "let": TokenType.Let,
-    "const": TokenType.Const
+    "const": TokenType.Const,
+    "fn": TokenType.Fn
 }
 
 
