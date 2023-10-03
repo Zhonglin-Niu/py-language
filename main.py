@@ -5,9 +5,13 @@ from src.interpreter import *
 from src.environment import Environment
 import readline
 import sys
+import os
 
 
 def repl():
+    if not os.path.exists(".input_history"):
+        with open(".input_history", "w", encoding="utf-8") as f:
+            ...
     readline.read_history_file(".input_history")
 
     parser = Parser()

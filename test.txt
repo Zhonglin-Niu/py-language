@@ -6,7 +6,7 @@ const obj = {
     foo,
     complex: {
         is_human: true,
-        is_girl: false,
+        is_girl: true,
     }
 };
 
